@@ -10,7 +10,7 @@ Instructor:           Thayer
 #include <iomanip>
 #include <vector>
 using namespace std;
-
+enum players {first, second};
 class Board
 {
 private:
@@ -28,15 +28,15 @@ public:
         {'*', '*', '*'}};
     }
 
-    void setTurn(int x,bool player)
+    void setToken(int x,players player)
     {
         static vector<int> col{0,0,0};
         switch(player){
-            case true:
+            case first:
                 v_board[x-1][2-col[x-1]] = 'D';
                 col[x-1]++;
                 break;
-            case false:
+            case second:
                 v_board[x-1][2-col[x-1]] = 'M';
                 col[x-1]++;
                 break;
@@ -45,8 +45,13 @@ public:
 
     }
 
+    vector<vector<char>> getVector()
+    const {
+        return v_board;
+    }
+
     void showBoard()
-    {   
+    const {   
         cout<<"1 2 3\n-----"<<endl;
         for (int y = 0; y < v_board.size(); y++)
         {
@@ -59,24 +64,61 @@ public:
     }
 };
 
+/* here darien here. working on win check, try all equal thingy vector method
+google it if you have to.
+*/
+bool winCheck(vector<vector<char>> v_board)
+{
+    for(int y{0}; y<v_board.size();y++)
+    {
+        if(v_board[y][0]==v_board[y][1] && v_board[y][1]==v_board[y][2])
+            return true;
+        else if()
+        {}
+    }
+
+
+
+    return false;
+}
 
 int main()
 {
     bool running = true;
     while(running){
+
         Board gameBoard;
 
 
         int choice{0};
         cout<<"Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"<<endl;
         gameBoard.showBoard();
-
+        players whichPlayer{first};
+        while(!winCheck)
+        {
+            switch (whichPlayer)
+            {
+                case first:
+                    int choice{0};
+                    cout<<"Player 1(D) choose a column(1-3, 0 to quit): ";
+                    cin >> choice;
+                    if(choice = 0)
+                        break;
+                    gameBoard.setToken(choice,whichPlayer);
+                    whichPlayer=second;
+                    break;
+                case second:
+                    int choice{0};
+                    cout<<"Player 2(M) choose a column(1-3, 0 to quit): ";
+                    cin >> choice;
+                    if(choice = 0)
+                        break;
+                    gameBoard.setToken(choice,whichPlayer);
+                    whichPlayer=first;
+                    break;
+            }
+        }
         
-        // cin >> choice;
-        // switch(choice){
-        //     case 1:
-                
-        // }
         running = false;
     }
 
