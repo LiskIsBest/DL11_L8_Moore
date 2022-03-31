@@ -1,0 +1,9 @@
+game board works *
+show board works *
+drop token works *
+still need to make win cons/tie game -
+need win/loss/tie counters -
+extra credit: change colors -
+
+* = done
+- = not done

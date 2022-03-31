@@ -2,6 +2,8 @@
   "files.associations": {
     "*.cs": "csharp",
     "*.html": "html",
-    "vector": "cpp"
+    "vector": "cpp",
+    "xstring": "cpp",
+    "iostream": "cpp"
   }
 }

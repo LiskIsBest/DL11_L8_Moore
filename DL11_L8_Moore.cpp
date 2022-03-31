@@ -10,124 +10,185 @@ Instructor:           Thayer
 #include <iomanip>
 #include <vector>
 using namespace std;
-enum players {first, second};
+
+// player state
+enum pState
+{
+	first = '1',
+	second = '2'
+};
+
+// loss also means "still going"
+enum gState
+{
+	win='w',
+	loss='l',
+	tie='t'
+};
+
+//----------------------------------------------------------------------------
 class Board
 {
 private:
-    char p1tok{'D'};
-    char p2tok{'M'};
-
-    vector<vector<char>> v_board;
+	vector<vector<string>> v_board; // init game board
 
 public:
-    Board()
-    {
-        v_board= {
-        {'*', '*', '*'},
-        {'*', '*', '*'},
-        {'*', '*', '*'}};
-    }
+	// tokens for players
+	string p1tok{"D"};
+	string p2tok{"M"};
+	// bool gameDone = false;
 
-    void setToken(int x,players player)
-    {
-        static vector<int> col{0,0,0};
-        switch(player){
-            case first:
-                v_board[x-1][2-col[x-1]] = 'D';
-                col[x-1]++;
-                break;
-            case second:
-                v_board[x-1][2-col[x-1]] = 'M';
-                col[x-1]++;
-                break;
-        }
+	// constructor
+	Board()
+	{
+		v_board = {{"*", "*", "*"}, {"*", "*", "*"}, {"*", "*", "*"}};
+	}
 
+	// drop token
+	void dropToken(int x, pState player)
+	{
 
-    }
+		// decides which row to place
+		static vector<int> row{0, 0, 0};
 
-    vector<vector<char>> getVector()
-    const {
-        return v_board;
-    }
+		switch (player)
+		{
+		case first:
+			v_board[x - 1][2 - row[x - 1]] = p1tok;
+			row[x - 1]++;
+			break;
+		case second:
+			v_board[x - 1][2 - row[x - 1]] = p2tok;
+			row[x - 1]++;
+			break;
+		}
+		if (gameCheck()==win)
+		{
+			row.assign(3, 0);
+		}
+	}
 
-    void showBoard()
-    const {   
-        cout<<"1 2 3\n-----"<<endl;
-        for (int y = 0; y < v_board.size(); y++)
-        {
-            for (int x = 0; x < v_board[y].size(); x++)
-            {
-                cout << v_board[x][y] << " ";
-            }
-            cout << endl;
-        }
-    }
+	// getter board
+	vector<vector<string>> getBoard()
+		const
+	{
+		return v_board;
+	}
+
+	// show the board
+	void showBoard()
+		const
+	{
+		cout << "1 2 3\n-----" << endl;
+		for (int y = 0; y < v_board.size(); y++)
+		{
+			for (int x = 0; x < v_board[y].size(); x++)
+			{
+				cout << v_board[x][y] << " ";
+			}
+			cout << endl;
+		}
+	}
+
+	gState gameCheck(){
+		//  column win check
+		for (int x{0}; x < v_board.size(); x++)
+		{
+			if (v_board[x][0] == v_board[x][1] && v_board[x][1] == v_board[x][2] && (v_board[x][0] == p1tok || v_board[x][0] == p2tok))
+				return win;
+		}
+		return loss;
+	}
+	
 };
 
-/* here darien here. working on win check, try all equal thingy vector method
-google it if you have to.
-*/
-bool winCheck(vector<vector<char>> v_board)
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+
+void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
 {
-    for(int y{0}; y<v_board.size();y++)
-    {
-        if(v_board[y][0]==v_board[y][1] && v_board[y][1]==v_board[y][2])
-            return true;
-        else if()
-        {}
-    }
-
-
-
-    return false;
+	cin.clear();
+	if (whichPlayer == first)
+		cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+	else
+		cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+	cin >> choice;
+	if (choice == 0)
+		running = false;
+	while (choice < 1 || choice > 3)
+	{
+		cout << "\nanswer out of range, please retry\n\n";
+		if (whichPlayer == first)
+			cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+		else
+			cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+		cin >> choice;
+	}
+	gameBoard.dropToken(choice, whichPlayer);
 }
 
 int main()
 {
-    bool running = true;
-    while(running){
+	bool running = true;
 
-        Board gameBoard;
+	cout << "Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"
+		 << endl;
+	int gameCount{0};
+	int player1wins{0};
+	int player2wins{0};
+	int gameTies{0};
 
+	while (running)
+	{
 
-        int choice{0};
-        cout<<"Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"<<endl;
-        gameBoard.showBoard();
-        players whichPlayer{first};
-        while(!winCheck)
-        {
-            switch (whichPlayer)
-            {
-                case first:
-                    int choice{0};
-                    cout<<"Player 1(D) choose a column(1-3, 0 to quit): ";
-                    cin >> choice;
-                    if(choice = 0)
-                        break;
-                    gameBoard.setToken(choice,whichPlayer);
-                    whichPlayer=second;
-                    break;
-                case second:
-                    int choice{0};
-                    cout<<"Player 2(M) choose a column(1-3, 0 to quit): ";
-                    cin >> choice;
-                    if(choice = 0)
-                        break;
-                    gameBoard.setToken(choice,whichPlayer);
-                    whichPlayer=first;
-                    break;
-            }
-        }
-        
-        running = false;
-    }
+		Board gameBoard;
+		int choice{0};
 
+		gameBoard.showBoard();
+		pState whichPlayer{first};
+		gState wonYet = gameBoard.gameCheck();
+		while (!(wonYet == win))
+		{
+			switch (whichPlayer)
+			{
+			case first:
+				turn(choice, gameBoard, running, whichPlayer);
+				whichPlayer = second;
+				break;
+			case second:
+				turn(choice, gameBoard, running, whichPlayer);
+				whichPlayer = first;
+				break;
+			}
+			wonYet = gameBoard.gameCheck();
+			cout << endl;
+			gameBoard.showBoard();
+		}
 
-    // Board one;
-    // one.getVec();
-    // one.setTurn(1);
-    // cout<<endl;
-    // one.getVec();
+		if (whichPlayer == second)
+		{
+			cout << "PLAYER 1 WON!" << '\n';
+			++player1wins;
+		}
+		else
+		{
+			cout << "PLAYER 2 WON!" << '\n';
+			++player2wins;
+		}
 
-    return 0;
+		char again{};
+		cout << "play again? y/n: ";
+		cin >> again;
+		if (tolower(again) == 'n')
+			running = false;
+		else
+			running = true;
+	}
+	return 0;
 }
+
+/* TEST OUTPUT
+
+
+*/
