@@ -9,6 +9,7 @@ Instructor:           Thayer
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 // player state
@@ -18,12 +19,12 @@ enum pState
 	second = '2'
 };
 
-// loss also means "still going"
+// game state
 enum gState
 {
-	win='w',
-	loss='l',
-	tie='t'
+	win = 'w',
+	cat = 't',
+	loss = 'l',
 };
 
 //----------------------------------------------------------------------------
@@ -36,12 +37,13 @@ public:
 	// tokens for players
 	string p1tok{"D"};
 	string p2tok{"M"};
-	// bool gameDone = false;
+	gState game;
 
 	// constructor
 	Board()
 	{
 		v_board = {{"*", "*", "*"}, {"*", "*", "*"}, {"*", "*", "*"}};
+		game = cat;
 	}
 
 	// drop token
@@ -62,7 +64,7 @@ public:
 			row[x - 1]++;
 			break;
 		}
-		if (gameCheck()==win)
+		if (gameCheck() == win || gameCheck()==cat)
 		{
 			row.assign(3, 0);
 		}
@@ -90,16 +92,33 @@ public:
 		}
 	}
 
-	gState gameCheck(){
-		//  column win check
+	gState gameCheck()
+	{
+
+		// vertical check
 		for (int x{0}; x < v_board.size(); x++)
 		{
 			if (v_board[x][0] == v_board[x][1] && v_board[x][1] == v_board[x][2] && (v_board[x][0] == p1tok || v_board[x][0] == p2tok))
 				return win;
 		}
+
+		// horizontal check
+		for (int y{0}; y < v_board.size(); y++)
+		{
+			if (v_board[0][y] == v_board[1][y] && v_board[1][y] == v_board[2][y] && (v_board[0][y] == p1tok || v_board[0][y] == p2tok))
+				return win;
+		}
+
+		// left bottom to right top diag check
+		if (v_board[0][0] == v_board[1][1] && v_board[1][1] == v_board[2][2] && (v_board[0][0] == p1tok || v_board[0][0] == p2tok))
+			return win;
+
+		// right bottom to left top diag check
+		else if (v_board[2][0] == v_board[1][1] && v_board[1][1] == v_board[0][2] && (v_board[2][0] == p1tok || v_board[2][0] == p2tok))
+			return win;
+		for (vector<string> x : v_board)
 		return loss;
 	}
-	
 };
 
 //-----------------------------------------------------------------------------
@@ -115,7 +134,7 @@ void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
 		cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
 	cin >> choice;
 	if (choice == 0)
-		running = false;
+		goto end_func;
 	while (choice < 1 || choice > 3)
 	{
 		cout << "\nanswer out of range, please retry\n\n";
@@ -126,6 +145,7 @@ void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
 		cin >> choice;
 	}
 	gameBoard.dropToken(choice, whichPlayer);
+end_func:;
 }
 
 int main()
@@ -147,8 +167,8 @@ int main()
 
 		gameBoard.showBoard();
 		pState whichPlayer{first};
-		gState wonYet = gameBoard.gameCheck();
-		while (!(wonYet == win))
+		// gState wonYet = gameBoard.gameCheck();
+		while (!(gameBoard.game == win))
 		{
 			switch (whichPlayer)
 			{
@@ -161,20 +181,31 @@ int main()
 				whichPlayer = first;
 				break;
 			}
-			wonYet = gameBoard.gameCheck();
+			if (choice == 0)
+				goto end_game;
+			if(gameBoard.game == cat){
+				++gameTies;
+			}
+			gameBoard.game = gameBoard.gameCheck();
 			cout << endl;
 			gameBoard.showBoard();
 		}
 
-		if (whichPlayer == second)
+		if(gameBoard.game == cat){
+			cout << "TIE GAME! NO ONE WON. :("<<'\n';
+			++gameCount;
+		}
+		else if(whichPlayer == second)
 		{
 			cout << "PLAYER 1 WON!" << '\n';
 			++player1wins;
+			++gameCount;
 		}
-		else
+		else if(whichPlayer == first)
 		{
 			cout << "PLAYER 2 WON!" << '\n';
 			++player2wins;
+			++gameCount;
 		}
 
 		char again{};
@@ -185,6 +216,7 @@ int main()
 		else
 			running = true;
 	}
+	end_game:;
 	return 0;
 }
 
