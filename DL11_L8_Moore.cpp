@@ -9,220 +9,214 @@ Instructor:           Thayer
 #include <iostream>
 #include <iomanip>
 #include <vector>
-using namespace std;
+#include <algorithm>
+#include <windows.h>
+using std::cout, std::cin, std::endl, std::string, std::vector, std::all_of;
 
-// player state
 enum pState
 {
-	first = '1',
-	second = '2'
+    first = '1',
+    second = '2'
 };
 
 // game state
-enum gState
-{
-	win = 'w',
-	cat = 't',
-	loss = 'l',
-};
 
-//----------------------------------------------------------------------------
 class Board
 {
+public: // datatypes
+    enum gState
+    {
+        win = 'w',
+        cat = 't',
+        loss = 'l',
+    };
+
 private:
-	vector<vector<string>> v_board; // init game board
+    string p1tok{};
+    string p2tok{};
+    gState game;
+    vector<vector<string>> v_board;
 
-public:
-	// tokens for players
-	string p1tok{"D"};
-	string p2tok{"M"};
-	gState game;
+public: // methods
+    // constructor
+    Board(string p1, string p2)
+    {
+        v_board = {{"*", "*", "*"}, {"*", "*", "*"}, {"*", "*", "*"}};
+        game = loss;
+        p1tok = p1;
+        p2tok = p2;
+    }
 
-	// constructor
-	Board()
-	{
-		v_board = {{"*", "*", "*"}, {"*", "*", "*"}, {"*", "*", "*"}};
-		game = cat;
-	}
+    Board::gState getGame()
+        const
+    {
+        return game;
+    }
+    void setGame(gState newState)
+    {
+        game = newState;
+    }
 
-	// drop token
-	void dropToken(int x, pState player)
-	{
+    void showBoard()
+        const
+    {
+        cout << "1 2 3\n-----" << endl;
+        for (int y = 0; y < v_board.size(); y++)
+        {
+            for (int x = 0; x < v_board[y].size(); x++)
+            {
+                cout << v_board[x][y] << " ";
+            }
+            cout << endl;
+        }
+    }
 
-		// decides which row to place
-		static vector<int> row{0, 0, 0};
+    void dropToken(int x, pState player)
+    {
 
-		switch (player)
-		{
-		case first:
-			v_board[x - 1][2 - row[x - 1]] = p1tok;
-			row[x - 1]++;
-			break;
-		case second:
-			v_board[x - 1][2 - row[x - 1]] = p2tok;
-			row[x - 1]++;
-			break;
-		}
-		if (row[0]==2&&row[1]==2&&row[2]==2){
-			row.assign(3,0);
-			game = cat;
-		}
-		else if (gameCheck() == win || gameCheck()==cat)
-		{
-			row.assign(3, 0);
-		}
-	}
+        // decides which row to place
+        static vector<int> row{0, 0, 0};
 
-	// getter board
-	vector<vector<string>> getBoard()
-		const
-	{
-		return v_board;
-	}
+        switch (player)
+        {
+        case first:
+            v_board[x - 1][2 - row[x - 1]] = p1tok;
+            row[x - 1]++;
+            break;
+        case second:
+            v_board[x - 1][2 - row[x - 1]] = p2tok;
+            row[x - 1]++;
+            break;
+        }
+        if (gameCheck() == win || gameCheck() == cat)
+        {
+            row.assign(3, 0);
+        }
+    }
 
-	// show the board
-	void showBoard()
-		const
-	{
-		cout << "1 2 3\n-----" << endl;
-		for (int y = 0; y < v_board.size(); y++)
-		{
-			for (int x = 0; x < v_board[y].size(); x++)
-			{
-				cout << v_board[x][y] << " ";
-			}
-			cout << endl;
-		}
-	}
+    gState gameCheck()
+    {
+        if (v_board[0][0] != "*" && v_board[0][1] != "*" && v_board[0][2] != "*" && v_board[1][0] != "*" && v_board[1][1] != "*" && v_board[1][2] != "*" && v_board[2][0] != "*" && v_board[2][1] != "*" && v_board[2][2] != "*")
+        {
+            return cat;
+        }
+        // vertical check
+        for (int x{0}; x < v_board.size(); x++)
+        {
+            if (v_board[x][0] == v_board[x][1] && v_board[x][1] == v_board[x][2] && (v_board[x][0] == p1tok || v_board[x][0] == p2tok))
+                return win;
+        }
 
-	gState gameCheck()
-	{
-		
-		// vertical check
-		for (int x{0}; x < v_board.size(); x++)
-		{
-			if (v_board[x][0] == v_board[x][1] && v_board[x][1] == v_board[x][2] && (v_board[x][0] == p1tok || v_board[x][0] == p2tok))
-				return win;
-		}
+        // horizontal check
+        for (int y{0}; y < v_board.size(); y++)
+        {
+            if (v_board[0][y] == v_board[1][y] && v_board[1][y] == v_board[2][y] && (v_board[0][y] == p1tok || v_board[0][y] == p2tok))
+                return win;
+        }
 
-		// horizontal check
-		for (int y{0}; y < v_board.size(); y++)
-		{
-			if (v_board[0][y] == v_board[1][y] && v_board[1][y] == v_board[2][y] && (v_board[0][y] == p1tok || v_board[0][y] == p2tok))
-				return win;
-		}
+        // left bottom to right top diag check
+        if (v_board[0][0] == v_board[1][1] && v_board[1][1] == v_board[2][2] && (v_board[0][0] == p1tok || v_board[0][0] == p2tok))
+            return win;
 
-		// left bottom to right top diag check
-		if (v_board[0][0] == v_board[1][1] && v_board[1][1] == v_board[2][2] && (v_board[0][0] == p1tok || v_board[0][0] == p2tok))
-			return win;
+        // right bottom to left top diag check
+        else if (v_board[2][0] == v_board[1][1] && v_board[1][1] == v_board[0][2] && (v_board[2][0] == p1tok || v_board[2][0] == p2tok))
+            return win;
 
-		// right bottom to left top diag check
-		else if (v_board[2][0] == v_board[1][1] && v_board[1][1] == v_board[0][2] && (v_board[2][0] == p1tok || v_board[2][0] == p2tok))
-			return win;
-		for (vector<string> x : v_board)
-		return loss;
-	}
+        return loss;
+    }
 };
 
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-
-void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
+void turn(int &choice, Board &gameBoard, pState &whichPlayer)
 {
-	cin.clear();
-	if (whichPlayer == first)
-		cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-	else
-		cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-	cin >> choice;
-	if (choice == 0)
-		return;
-	while (choice < 1 || choice > 3)
-	{
-		cout << "\nanswer out of range, please retry\n\n";
-		if (whichPlayer == first)
-			cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-		else
-			cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-		cin >> choice;
-	}
-	gameBoard.dropToken(choice, whichPlayer);
+    cin.clear();
+    if (whichPlayer == first)
+        cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+    else
+        cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+    cin >> choice;
+    if (choice == 0)
+    {
+        return;
+    }
+    while (choice < 1 || choice > 3)
+    {
+        cout << "\nChoice out of range, please retry\n\n";
+        if (whichPlayer == first)
+            cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+        else
+            cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+        cin >> choice;
+    }
+    gameBoard.dropToken(choice, whichPlayer);
 }
 
 int main()
 {
-	bool running = true;
+    float gameCount{0};
+    float player1wins{0};
+    float player2wins{0};
+    float gameTies{0};
 
-	cout << "Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"
-		 << endl;
-	int gameCount{0};
-	int player1wins{0};
-	int player2wins{0};
-	int gameTies{0};
+    cout << "Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"
+         << endl;
 
-	while (running)
-	{
+    char playAgain{' '};
+    do
+    {
+        gameCount++;
+        int choice{0};
+        pState whichPlayer{first};
+        Board gameBoard("D", "M");
+        gameBoard.showBoard();
+        while (gameBoard.getGame() == Board::loss)
+        {
+            switch (whichPlayer)
+            {
+            case first:
+                turn(choice, gameBoard, whichPlayer);
+                whichPlayer = second;
+                break;
+            case second:
+                turn(choice, gameBoard, whichPlayer);
+                whichPlayer = first;
+                break;
+            }
+            if (choice == 0)
+            {
+                break;
+            }
+            gameBoard.setGame(gameBoard.gameCheck());
+            cout << endl;
+            gameBoard.showBoard();
+            if (gameBoard.gameCheck() == Board::win)
+            {
+                switch (whichPlayer)
+                {
+                case second:
+                    cout << "Player 1 wins!\n"
+                         << endl;
+                    player1wins++;
+                    break;
+                case first:
+                    cout << "Player 2 wins!\n"
+                         << endl;
+                    player2wins++;
+                    break;
+                }
+            }
+            else if (gameBoard.gameCheck() == Board::cat)
+            {
+                cout << "Game is a tie. No one won.\n"
+                     << endl;
+                gameTies++;
+            }
+        }
+        cout << "Play again? y/n: ";
+        cin >> playAgain;
+    } while (toupper(playAgain) != 'N');
 
-		Board gameBoard;
-		int choice{0};
-
-		gameBoard.showBoard();
-		pState whichPlayer{first};
-		// gState wonYet = gameBoard.gameCheck();
-		while (gameBoard.game=loss)
-		{
-			switch (whichPlayer)
-			{
-			case first:
-				turn(choice, gameBoard, running, whichPlayer);
-				whichPlayer = second;
-				break;
-			case second:
-				turn(choice, gameBoard, running, whichPlayer);
-				whichPlayer = first;
-				break;
-			}
-			if (choice == 0)
-				goto end_game;
-			if(gameBoard.game == cat){
-				++gameTies;
-			}
-			gameBoard.game = gameBoard.gameCheck();
-			cout << endl;
-			gameBoard.showBoard();
-		}
-
-		if(gameBoard.game == cat){
-			cout << "TIE GAME! NO ONE WON. :("<<'\n';
-			++gameCount;
-		}
-		else if(whichPlayer == second)
-		{
-			cout << "PLAYER 1 WON!" << '\n';
-			++player1wins;
-			++gameCount;
-		}
-		else if(whichPlayer == first)
-		{
-			cout << "PLAYER 2 WON!" << '\n';
-			++player2wins;
-			++gameCount;
-		}
-
-		char again{};
-		cout << "play again? y/n: ";
-		cin >> again;
-		if (tolower(again) == 'n')
-			running = false;
-		else
-			running = true;
-	}
-	end_game:;
-	return 0;
+    cout << "\nPlayer 1 won: " << player1wins << " times. " << ((player1wins / gameCount) * 100) << '%' << endl;
+    cout << "Player 2 won: " << player2wins << " times. " << ((player2wins / gameCount) * 100) << '%' << endl;
+    cout << "There was a tie: " << gameTies << " times. " << ((gameTies / gameCount) * 100) << '%' << endl;
+    return 0;
 }
-
-/* TEST OUTPUT
-
-
-*/
