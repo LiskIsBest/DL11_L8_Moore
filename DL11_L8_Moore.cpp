@@ -126,30 +126,6 @@ public: // methods
     }
 };
 
-void turn(int &choice, Board &gameBoard, pState &whichPlayer)
-{
-    cin.clear();
-    if (whichPlayer == first)
-        cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-    else
-        cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-    cin >> choice;
-    if (choice == 0)
-    {
-        return;
-    }
-    while (choice < 1 || choice > 3)
-    {
-        cout << "\nChoice out of range, please retry\n\n";
-        if (whichPlayer == first)
-            cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-        else
-            cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-        cin >> choice;
-    }
-    gameBoard.dropToken(choice, whichPlayer);
-}
-
 int main()
 {
     float gameCount{0};
@@ -170,21 +146,34 @@ int main()
         gameBoard.showBoard();
         while (gameBoard.getGame() == Board::loss)
         {
-            switch (whichPlayer)
+            vector<int> row{0, 0, 0};
+            cin.clear();
+            if (whichPlayer == first)
             {
-            case first:
-                turn(choice, gameBoard, whichPlayer);
+                cout << "Player 1(M) choose a column(1-3, 0 to quit): ";
                 whichPlayer = second;
-                break;
-            case second:
-                turn(choice, gameBoard, whichPlayer);
-                whichPlayer = first;
-                break;
             }
+            else
+            {
+                cout << "Player 2(D) choose a column(1-3, 0 to quit): ";
+                whichPlayer = first;
+            }
+            cin >> choice;
             if (choice == 0)
             {
                 break;
             }
+            while (choice < 1 || choice > 3 || row[choice - 1] >= 3)
+            {
+                cout << "\nChoice out of range, please retry\n\n";
+                if (whichPlayer == first)
+                    cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+                else
+                    cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+                cin >> choice;
+            }
+            row[choice - 1]++;
+            gameBoard.dropToken(choice, whichPlayer);
             gameBoard.setGame(gameBoard.gameCheck());
             cout << endl;
             gameBoard.showBoard();
@@ -196,11 +185,13 @@ int main()
                     cout << "Player 1 wins!\n"
                          << endl;
                     player1wins++;
+                    row.assign(3, 0);
                     break;
                 case first:
                     cout << "Player 2 wins!\n"
                          << endl;
                     player2wins++;
+                    row.assign(3, 0);
                     break;
                 }
             }
@@ -208,6 +199,7 @@ int main()
             {
                 cout << "Game is a tie. No one won.\n"
                      << endl;
+                row.assign(3, 0);
                 gameTies++;
             }
         }
@@ -220,3 +212,235 @@ int main()
     cout << "There was a tie: " << gameTies << " times. " << ((gameTies / gameCount) * 100) << '%' << endl;
     return 0;
 }
+
+/* TEST OUTPUT
+
+Welcome to connect 3. The two player tokens are D and M. D goes first.
+Select column numbers 1, 2, or 3 to choose a column.
+
+1 2 3
+-----
+* * *
+* * *
+* * *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+* * *
+M * *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+* * *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+M * *
+M D *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+M D *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+M * *
+M D *
+M D *
+Player 1 wins!
+
+Play again? y/n: y
+1 2 3
+-----
+* * *
+* * *
+* * *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+* * *
+M * *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+* * *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+* * *
+* * *
+M D M
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+* D *
+M D M
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+M D *
+M D M
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* D *
+M D *
+M D M
+Player 2 wins!
+
+Play again? y/n: y
+1 2 3
+-----
+* * *
+* * *
+* * *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+* * *
+M * *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+* * *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+M * *
+M D *
+Player 2(D) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+* * *
+M * *
+M D D
+Player 1(M) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+M M *
+M D D
+Player 2(D) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+D * *
+M M *
+M D D
+Player 1(M) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+D * *
+M M M
+M D D
+Player 1 wins!
+
+Play again? y/n: y
+1 2 3
+-----
+* * *
+* * *
+* * *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+* * *
+M * *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+* * *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+* * *
+M * *
+M D *
+Player 2(D) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+* * *
+M D *
+M D *
+Player 1(M) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+* * *
+M D *
+M D M
+Player 2(D) choose a column(1-3, 0 to quit): 1
+
+1 2 3
+-----
+D * *
+M D *
+M D M
+Player 1(M) choose a column(1-3, 0 to quit): 2
+
+1 2 3
+-----
+D M *
+M D *
+M D M
+Player 2(D) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+D M *
+M D D
+M D M
+Player 1(M) choose a column(1-3, 0 to quit): 3
+
+1 2 3
+-----
+D M M
+M D D
+M D M
+Game is a tie. No one won.
+
+Play again? y/n: n
+
+Player 1 won: 2 times. 50%
+Player 2 won: 1 times. 25%
+There was a tie: 1 times. 25%
+*/
