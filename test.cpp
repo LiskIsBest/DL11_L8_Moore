@@ -7,7 +7,15 @@ using namespace std;
 class test
 {
 public:
-    int x{10};
+    enum classEnum{
+        one,
+        two,
+        three
+    };
+    
+public:
+
+    classEnum x{one};
 };
 
 // bool foundit(vector<vector<string>> v_board, string key){
@@ -38,4 +46,11 @@ int main()
     // else{
     //     cout<<"not found it"<<endl;
     // }
+
+    test ObjTest;
+    if(ObjTest.x==test::one)
+    {
+        cout<<"has"<<endl;
+    }
+
 }

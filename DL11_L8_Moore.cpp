@@ -9,7 +9,6 @@ Instructor:           Thayer
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
 // player state
@@ -64,7 +63,11 @@ public:
 			row[x - 1]++;
 			break;
 		}
-		if (gameCheck() == win || gameCheck()==cat)
+		if (row[0]==2&&row[1]==2&&row[2]==2){
+			row.assign(3,0);
+			game = cat;
+		}
+		else if (gameCheck() == win || gameCheck()==cat)
 		{
 			row.assign(3, 0);
 		}
@@ -94,7 +97,7 @@ public:
 
 	gState gameCheck()
 	{
-
+		
 		// vertical check
 		for (int x{0}; x < v_board.size(); x++)
 		{
@@ -134,7 +137,7 @@ void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
 		cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
 	cin >> choice;
 	if (choice == 0)
-		goto end_func;
+		return;
 	while (choice < 1 || choice > 3)
 	{
 		cout << "\nanswer out of range, please retry\n\n";
@@ -145,7 +148,6 @@ void turn(int &choice, Board &gameBoard, bool &running, pState whichPlayer)
 		cin >> choice;
 	}
 	gameBoard.dropToken(choice, whichPlayer);
-end_func:;
 }
 
 int main()
@@ -168,7 +170,7 @@ int main()
 		gameBoard.showBoard();
 		pState whichPlayer{first};
 		// gState wonYet = gameBoard.gameCheck();
-		while (!(gameBoard.game == win))
+		while (gameBoard.game=loss)
 		{
 			switch (whichPlayer)
 			{
