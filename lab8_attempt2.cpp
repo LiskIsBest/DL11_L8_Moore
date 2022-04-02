@@ -9,8 +9,8 @@ Instructor:           Thayer
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <string>
-using namespace std;
+
+using std::cout, std::cin, std::endl, std::string, std::vector;
 
 enum pState
 {
@@ -37,7 +37,6 @@ private:
     vector<vector<string>> v_board;
 
 public: // methods
-
     // constructor
     Board(string p1, string p2)
     {
@@ -47,10 +46,12 @@ public: // methods
         p2tok = p2;
     }
 
-    gState const getGame(){
+    Board::gState getGame()
+    const{
         return game;
     }
-    gState setGame(gState newState){
+    void setGame(gState newState)
+    {
         game = newState;
     }
 
@@ -120,58 +121,77 @@ public: // methods
     }
 };
 
-void turn(int &choice, Board &gameBoard, pState whichPlayer)
+void turn(int &choice, Board &gameBoard, pState &whichPlayer)
 {
-	cin.clear();
-	if (whichPlayer == first)
-		cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-	else
-		cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-	cin >> choice;
-	if (choice == 0)
-		return;
-	while (choice < 1 || choice > 3)
-	{
-		cout << "\nanswer out of range, please retry\n\n";
-		if (whichPlayer == first)
-			cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
-		else
-			cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
-		cin >> choice;
-	}
-	gameBoard.dropToken(choice, whichPlayer);
+    cin.clear();
+    if (whichPlayer == first)
+        cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+    else
+        cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+    cin >> choice;
+    if (choice == 0)
+    {
+        return;
+    }
+    while (choice < 1 || choice > 3)
+    {
+        cout << "\nChoice out of range, please retry\n\n";
+        if (whichPlayer == first)
+            cout << "Player 1(D) choose a column(1-3, 0 to quit): ";
+        else
+            cout << "Player 2(M) choose a column(1-3, 0 to quit): ";
+        cin >> choice;
+    }
+    gameBoard.dropToken(choice, whichPlayer);
 }
 
 int main()
 {
     int gameCount{0};
-	int player1wins{0};
-	int player2wins{0};
-	int gameTies{0};
-    int choice{0};
-    pState whichPlayer{first};
-    Board gameBoard("D","M");
-    gameBoard.showBoard();
-    while(gameBoard.getGame() == Board::loss){
-        switch (whichPlayer)
-        {
-        case first:
-            turn(choice, gameBoard, whichPlayer);
-            whichPlayer = second;
-            break;
-        case second:
-            turn(choice, gameBoard, whichPlayer);
-            whichPlayer = first;
-            break;
-        }
-        if(gameBoard.getGame() == Board::cat){
-            ++gameTies;
-        }
-        gameBoard.setGame(gameBoard.gameCheck());
-        cout << endl;
+    int player1wins{0};
+    int player2wins{0};
+    int gameTies{0};
+
+    cout << "Welcome to connect 3. The two player tokens are D and M. D goes first.\nSelect column numbers 1, 2, or 3 to choose a column.\n"
+         << endl;
+
+    char playAgain{' '};
+    do
+    {
+        int choice{0};
+        pState whichPlayer{first};
+        Board gameBoard("D", "M");
         gameBoard.showBoard();
-    }
+        while (gameBoard.getGame() == Board::loss)
+        {
+            switch (whichPlayer)
+            {
+            case first:
+                turn(choice, gameBoard, whichPlayer);
+                whichPlayer = second;
+                break;
+            case second:
+                turn(choice, gameBoard, whichPlayer);
+                whichPlayer = first;
+                break;
+            }
+            if (gameBoard.getGame() == Board::cat)
+            {
+                ++gameTies;
+            }
+            if(choice == 0){
+                break;
+            }
+            gameBoard.setGame(gameBoard.gameCheck());
+            cout << endl;
+            gameBoard.showBoard();
+        }
         
+
+
+        cout << "Play again? y/n: ";
+        cin >> playAgain;
+    } while (toupper(playAgain) != 'N');
 
     return 0;
 }
